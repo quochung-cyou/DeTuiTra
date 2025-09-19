@@ -27,15 +27,19 @@ export default defineConfig(({ mode }) => ({
     // PWA Plugin
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'logo.png'],
+      includeAssets: ['favicon.ico', 'logo.png', 'apple-icon-180.png', 'manifest-icon-192.maskable.png', 'manifest-icon-512.maskable.png'],
       manifest: {
         name: 'Để Tui Trả',
         short_name: 'Để Tui Trả',
         description: 'Điểm chạm của nền kinh tế số',
-        theme_color: '#1f2937',
-        background_color: '#f8fafc',
+        theme_color: '#ffffff', // Changed to white for better splash screen appearance
+        background_color: '#ffffff', // White background for splash screen
         display: 'standalone',
+        start_url: '/',
+        scope: '/',
+        orientation: 'portrait-primary',
         icons: [
+          // Standard icons for general use
           {
             src: '/logo.png',
             sizes: '192x192',
@@ -48,17 +52,37 @@ export default defineConfig(({ mode }) => ({
             type: 'image/png',
             purpose: 'any'
           },
+          // Proper maskable icons with safe zone padding
           {
-            src: '/logo.png',
+            src: '/manifest-icon-192.maskable.png',
             sizes: '192x192',
             type: 'image/png',
             purpose: 'maskable'
           },
           {
-            src: '/logo.png',
+            src: '/manifest-icon-512.maskable.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable'
+          },
+          // Additional sizes for better compatibility
+          {
+            src: '/logo.png',
+            sizes: '144x144',
+            type: 'image/png',
+            purpose: 'any'
+          },
+          {
+            src: '/logo.png',
+            sizes: '256x256',
+            type: 'image/png',
+            purpose: 'any'
+          },
+          {
+            src: '/logo.png',
+            sizes: '384x384',
+            type: 'image/png',
+            purpose: 'any'
           }
         ]
       },
