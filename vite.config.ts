@@ -27,20 +27,38 @@ export default defineConfig(({ mode }) => ({
     // PWA Plugin
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'logo.png', 'pwa-512x512.png'],
+      includeAssets: ['favicon.ico', 'logo.png'],
       manifest: {
         name: 'Để Tui Trả',
         short_name: 'Để Tui Trả',
         description: 'Điểm chạm của nền kinh tế số',
-        theme_color: '#ffffff',
-        background_color: '#ffffff',
+        theme_color: '#1f2937',
+        background_color: '#f8fafc',
         display: 'standalone',
         icons: [
           {
             src: '/logo.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'any'
+          },
+          {
+            src: '/logo.png',
             sizes: '512x512',
             type: 'image/png',
-            purpose: 'any maskable'
+            purpose: 'any'
+          },
+          {
+            src: '/logo.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'maskable'
+          },
+          {
+            src: '/logo.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable'
           }
         ]
       },

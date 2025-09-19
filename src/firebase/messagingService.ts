@@ -196,13 +196,13 @@ export const sendTransactionNotification = async (
   try {
     // Default values
     let creatorName = 'Someone';
-    let creatorPhoto = '/pwa-512x512.png';
+    let creatorPhoto = '/logo.png';
     
     try {
       const creator = await getUserById(creatorId);
       if (creator) {
         creatorName = creator.displayName || 'Thành viên';
-        creatorPhoto = creator.photoURL || '/pwa-512x512.png';
+        creatorPhoto = creator.photoURL || '/logo.png';
       }
     } catch (creatorError) {
       console.warn('Error getting creator data:', creatorError);

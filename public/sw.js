@@ -6,15 +6,14 @@ importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js'
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js');
 
 // Cache name for app shell and dynamic content
-const CACHE_NAME = 'fund-flow-cache-v1-30082025-02';
-const DYNAMIC_CACHE = 'fund-flow-dynamic-cache-v1-30082025-02';
+const CACHE_NAME = 'fund-flow-cache-v1-19092025-02';
+const DYNAMIC_CACHE = 'fund-flow-dynamic-cache-v1-19092025-02';
 
 // Resources to cache immediately (app shell)
 const APP_SHELL = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/pwa-512x512.png',
   '/logo.png',
   '/favicon.ico'
 ];
@@ -48,7 +47,7 @@ messaging.onBackgroundMessage((payload) => {
   const notificationTitle = payload.notification?.title || 'Để Tui Trả Notification';
   const notificationOptions = {
     body: payload.notification?.body || 'New notification from Để Tui Trả',
-    icon: payload.notification?.icon || '/pwa-512x512.png',
+    icon: payload.notification?.icon || '/logo.png',
     badge: '/logo.png',
     vibrate: [100, 50, 100],
     tag: payload.data?.notificationId || `notification-${Date.now()}`, // Use tag to prevent duplicate notifications
@@ -93,7 +92,7 @@ self.addEventListener('push', (event) => {
       
       const options = {
         body: data.body || 'New notification from Để Tui Trả',
-        icon: data.icon || '/pwa-512x512.png',
+        icon: data.icon || '/logo.png',
         badge: '/logo.png',
         vibrate: [100, 50, 100],
         tag: notificationId, // Use tag to prevent duplicate notifications
@@ -131,7 +130,7 @@ self.addEventListener('push', (event) => {
       // Fallback for text messages
       const options = {
         body: event.data.text() || 'New notification from Để Tui Trả',
-        icon: '/pwa-512x512.png',
+        icon: '/logo.png',
         badge: '/logo.png',
         tag: `fallback-${Date.now()}`,
         requireInteraction: true

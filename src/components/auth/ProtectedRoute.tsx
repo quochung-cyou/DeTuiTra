@@ -1,9 +1,6 @@
 import { useApp } from "@/context/AppContext";
-import { Navigate, Outlet, useLocation } from "react-router-dom";
-import { useEffect, useState } from "react";
-
-// Load React components needed for auth flow
-import { Suspense, lazy } from 'react';
+import { Outlet, useLocation } from "react-router-dom";
+import { useEffect, Suspense, lazy } from "react";
 
 // Import the skeleton loader
 import { DashboardSkeleton } from '../skeletons/DashboardSkeleton';
@@ -21,7 +18,7 @@ const LoginPage = lazy(() =>
 );
 
 export function ProtectedRoute() {
-  const { currentUser, isAuthLoading } = useApp();
+  const { currentUser, isAuthLoading, authInitialized } = useApp();
   const location = useLocation();
   
   // Store the current route for potential login redirect
@@ -31,17 +28,21 @@ export function ProtectedRoute() {
     }
   }, [location.pathname]);
 
-  // If we're still checking auth status but have no user yet, show skeleton
-  // This prevents unnecessary redirects to login while auth is being checked
-  if (isAuthLoading && !currentUser) {
-    // Show site skeleton based on the current route instead of generic loading
+  console.log('ProtectedRoute: Auth state -', { 
+    currentUser: currentUser?.email || 'none', 
+    isAuthLoading, 
+    authInitialized 
+  });
+
+  // If Firebase hasn't initialized yet, or we're explicitly loading, show skeleton
+  if (!authInitialized || isAuthLoading) {
+    console.log('ProtectedRoute: Showing skeleton - auth not ready');
     return <DashboardSkeleton />;
   }
 
-  // Only show login when we're 100% sure there's no authenticated user
-  if (!currentUser && !isAuthLoading) {
-    // Instead of Navigate, render LoginPage inline to avoid URL change
-    // This feels more seamless as the URL doesn't change unnecessarily
+  // If auth is initialized and we have no user, show login
+  if (authInitialized && !currentUser) {
+    console.log('ProtectedRoute: Showing login - no authenticated user');
     return (
       <Suspense fallback={<DashboardSkeleton />}>
         <LoginPage noRedirect />
@@ -50,5 +51,6 @@ export function ProtectedRoute() {
   }
 
   // User is authenticated, render the requested route
+  console.log('ProtectedRoute: User authenticated, rendering protected route');
   return <Outlet />;
 }

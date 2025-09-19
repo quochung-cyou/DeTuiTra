@@ -183,7 +183,7 @@ export function FCMInitializer({ pollingInterval = 10000 }: FCMInitializerProps)
         console.log('Showing browser notification via service worker');
         registration.showNotification(notification.title, {
           body: notification.body,
-          icon: notification.icon || '/pwa-512x512.png',
+          icon: notification.icon || '/logo.png',
           badge: '/logo.png',
           vibrate: [100, 50, 100],
           tag: notification.id, // Use ID as tag to prevent duplicates

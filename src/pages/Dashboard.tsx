@@ -9,50 +9,41 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { DashboardSkeleton } from "@/components/skeletons/DashboardSkeleton";
 import { TestNotification } from "@/components/pwa";
-import { useDashboard } from "@/services/dashboardService";
 import { BankAccountButton } from "@/components/profile/BankAccountButton";
 
 export default function Dashboard() {
-  const { currentUser, loadUsers } = useApp();
-  const { funds, isLoading } = useDashboard(currentUser);
+  const { currentUser, funds, isLoading, hasInitiallyLoaded, loadUsers } = useApp();
   const [searchTerm, setSearchTerm] = useState("");
-  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
-  const [usersLoading, setUsersLoading] = useState(true);
+  const [usersLoadingForFunds, setUsersLoadingForFunds] = useState(false);
 
-  // Load all users from funds when funds change
+  // Load users for all fund members when funds are available
   useEffect(() => {
-    if (!isLoading && funds.length > 0) {
-      console.log('Dashboard: Loading users for funds...');
-      const allUserIds = new Set<string>();
-      
-      funds.forEach(fund => {
-        fund.members.forEach(memberId => {
-          allUserIds.add(memberId);
-        });
+    // Early return if still loading funds or no funds to process
+    if (!hasInitiallyLoaded || funds.length === 0) {
+      setUsersLoadingForFunds(false);
+      return;
+    }
+
+    console.log('Dashboard: Loading users for funds...');
+    const allUserIds = new Set<string>();
+    
+    funds.forEach(fund => {
+      fund.members.forEach(memberId => {
+        if (memberId) allUserIds.add(memberId);
       });
+    });
 
-      console.log('Dashboard: Found user IDs to load:', Array.from(allUserIds));
+    const userIdsArray = Array.from(allUserIds);
+    console.log('Dashboard: Found user IDs to load:', userIdsArray);
 
-      if (allUserIds.size > 0) {
-        loadUsers(Array.from(allUserIds)).finally(() => {
-          console.log('Dashboard: User loading complete');
-          setUsersLoading(false);
-        });
-      } else {
-        setUsersLoading(false);
-      }
-    } else if (!isLoading && funds.length === 0) {
-      setUsersLoading(false);
+    if (userIdsArray.length > 0) {
+      setUsersLoadingForFunds(true);
+      loadUsers(userIdsArray).finally(() => {
+        console.log('Dashboard: User loading complete');
+        setUsersLoadingForFunds(false);
+      });
     }
-  }, [funds, isLoading, loadUsers]);
-
-
-  // Set initialLoadComplete to true after the first load
-  useEffect(() => {
-    if (!isLoading && !usersLoading && !initialLoadComplete) {
-      setInitialLoadComplete(true);
-    }
-  }, [isLoading, usersLoading, initialLoadComplete]);
+  }, [funds, hasInitiallyLoaded, loadUsers]);
 
   // Filter funds based on search term
   const filteredFunds = funds.filter(fund => 
@@ -76,7 +67,8 @@ export default function Dashboard() {
     show: { y: 0, opacity: 1, transition: { type: "spring", stiffness: 70 } }
   };
 
-  if (isLoading || usersLoading || !initialLoadComplete) {
+  // Show loading until initial data load is complete or users are loading
+  if (!hasInitiallyLoaded || isLoading || usersLoadingForFunds) {
     console.log("Rendering DashboardSkeleton");
     return <DashboardSkeleton />
   }

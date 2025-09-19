@@ -24,7 +24,7 @@ import { Input } from "@/components/ui/input";
 import { useSidebar } from "@/components/ui/sidebar";
 
 export function AppSidebar() {
-  const { currentUser, funds, logout, selectedFund, setSelectedFund } = useApp();
+  const { currentUser, funds, logout, selectedFund, setSelectedFund, hasInitiallyLoaded } = useApp();
   const location = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
   const { isMobile, setOpenMobile } = useSidebar();
@@ -126,34 +126,42 @@ export function AppSidebar() {
           
           <SidebarGroupContent>
             <SidebarMenu>
-              {filteredFunds.length > 0 ? filteredFunds.map((fund) => (
-                <motion.div
-                  key={fund.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      className={cn(
-                        selectedFund?.id === fund.id ? "bg-blue-50 text-blue-600" : "",
-                        "transition-all duration-200 hover:bg-blue-50/50"
-                      )}
-                      onClick={() => setSelectedFund(fund)}
-                      isActive={location.pathname === `/funds/${fund.id}`}
-                      asChild
-                    >
-                      <Link to={`/funds/${fund.id}`} onClick={handleNavigation} className="flex items-center gap-3 w-full overflow-hidden">
-                        <span className="text-lg flex-shrink-0">{fund.icon}</span>
-                        <span className="truncate">{fund.name}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </motion.div>
-              )) : (
+              {!hasInitiallyLoaded ? (
                 <div className="text-center py-4 text-sm text-muted-foreground">
-                  Không tìm thấy quỹ nào
+                  Đang tải...
                 </div>
+              ) : (
+                <>
+                  {filteredFunds.length > 0 ? filteredFunds.map((fund) => (
+                    <motion.div
+                      key={fund.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <SidebarMenuItem>
+                        <SidebarMenuButton
+                          className={cn(
+                            selectedFund?.id === fund.id ? "bg-blue-50 text-blue-600" : "",
+                            "transition-all duration-200 hover:bg-blue-50/50"
+                          )}
+                          onClick={() => setSelectedFund(fund)}
+                          isActive={location.pathname === `/funds/${fund.id}`}
+                          asChild
+                        >
+                          <Link to={`/funds/${fund.id}`} onClick={handleNavigation} className="flex items-center gap-3 w-full overflow-hidden">
+                            <span className="text-lg flex-shrink-0">{fund.icon}</span>
+                            <span className="truncate">{fund.name}</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    </motion.div>
+                  )) : (
+                    <div className="text-center py-4 text-sm text-muted-foreground">
+                      {searchTerm ? "Không tìm thấy quỹ nào" : "Chưa có quỹ nào"}
+                    </div>
+                  )}
+                </>
               )}
             </SidebarMenu>
           </SidebarGroupContent>

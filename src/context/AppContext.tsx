@@ -1,4 +1,4 @@
-import { createContext, useState, useContext, ReactNode, useEffect } from "react";
+import { createContext, useState, useContext, ReactNode, useEffect, useCallback } from "react";
 import { Fund, Transaction, User } from "@/types";
 import { toast } from "sonner";
 import { 
@@ -47,7 +47,9 @@ interface AppContextType {
   calculateBalances: (fundId: string) => { userId: string; amount: number }[];
   refreshCurrentUser: () => Promise<void>;
   isAuthLoading: boolean;
+  authInitialized: boolean;
   isLoading: boolean;
+  hasInitiallyLoaded: boolean;
   loadUserFunds: (userId: string) => Promise<void>;
   loadFundTransactions: (fundId: string) => Promise<void>;
   deleteFund: (fundId: string) => Promise<boolean>;
@@ -61,9 +63,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [funds, setFunds] = useState<Fund[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [selectedFund, setSelectedFund] = useState<Fund | null>(null);
-  const [isAuthLoading, setIsAuthLoading] = useState<boolean>(false);
+  const [isAuthLoading, setIsAuthLoading] = useState<boolean>(true); // Start as true
+  const [authInitialized, setAuthInitialized] = useState<boolean>(false); // Track if auth has been checked
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [users, setUsers] = useState<Record<string, User>>({});
+  const [hasInitiallyLoaded, setHasInitiallyLoaded] = useState<boolean>(false);
 
   // Convert Firebase user to our User type
   const convertFirebaseUser = (firebaseUser: FirebaseUser): User => {
@@ -110,7 +114,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   // Load multiple users by IDs using the centralized batch function
-  const loadUsers = async (userIds: string[]) => {
+  const loadUsers = useCallback(async (userIds: string[]) => {
     if (!userIds || userIds.length === 0) return;
     
     // Filter out IDs that are already loaded, invalid, or the current user
@@ -143,7 +147,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [currentUser?.id, users]);
 
   // Get user by ID - synchronous, uses preloaded data
   const getUserById = (id: string): User => {
@@ -246,7 +250,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   // Load user's funds from Firebase
-  const loadUserFunds = async (userId: string) => {
+  const loadUserFunds = useCallback(async (userId: string) => {
     if (!userId) return;
     
     try {
@@ -267,15 +271,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
       
       // Update state with deduplicated funds
       setFunds(uniqueFunds);
+      setHasInitiallyLoaded(true); // Mark initial load as complete
       
       console.log(`Loaded ${userFunds.length} funds, deduplicated to ${uniqueFunds.length}`);
     } catch (error) {
       console.error('Error loading funds:', error);
       toast.error('Không thể tải danh sách quỹ');
+      setHasInitiallyLoaded(true); // Mark as loaded even on error to prevent infinite loading
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [funds]);
 
   // Load transactions for a specific fund
   const loadFundTransactions = async (fundId: string) => {
@@ -470,34 +476,64 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // Check for cached auth state on initial load
   useEffect(() => {
-    // Try to restore from sessionStorage to avoid showing login screen unnecessarily
+    console.log('AppContext: Initializing authentication...');
+    let hasRestoredFromCache = false;
+    
+    // Try to restore from sessionStorage to provide immediate UI feedback
     const cachedUser = sessionStorage.getItem('currentUser');
     if (cachedUser) {
       try {
         const parsedUser = JSON.parse(cachedUser);
+        console.log('AppContext: Restored user from cache:', parsedUser.email);
         setCurrentUser(parsedUser);
-        // Set a very short loading time since we have cached data
-        setTimeout(() => setIsAuthLoading(false), 50);
+        setIsAuthLoading(false); // Show UI immediately with cached data
+        hasRestoredFromCache = true;
+        
+        // Load funds for cached user in background
+        loadUserFunds(parsedUser.id).catch(error => {
+          console.error('Error loading cached user funds:', error);
+        });
       } catch (e) {
-        // Invalid cache, will be handled by the auth listener below
+        console.warn('AppContext: Invalid cached user data, removing cache');
         sessionStorage.removeItem('currentUser');
       }
     }
 
-    // Listen for authentication state changes - but don't block UI rendering
+    // Listen for authentication state changes
     const unsubscribe = onAuthStateChange(async (firebaseUser) => {
+      console.log('AppContext: Auth state changed:', firebaseUser ? 'authenticated' : 'not authenticated');
+      setAuthInitialized(true); // Mark that Firebase has provided initial state
+      
       if (firebaseUser) {
+        // Skip processing if we already have this exact user loaded
+        if (currentUser && currentUser.id === firebaseUser.uid && hasRestoredFromCache) {
+          console.log('AppContext: User already loaded from cache, verifying...');
+          // Just verify the user is still valid, don't reload everything
+          try {
+            await syncUserWithFirestore(firebaseUser);
+            console.log('AppContext: Cached user verified successfully');
+          } catch (error) {
+            console.warn('AppContext: Error verifying cached user:', error);
+          }
+          setIsAuthLoading(false);
+          return;
+        }
+        
         try {
+          console.log('AppContext: Syncing user with Firestore...');
           // Get complete user data from Firestore (including bankAccount)
           const fullUser = await syncUserWithFirestore(firebaseUser);
           setCurrentUser(fullUser);
           // Cache the complete user data
           sessionStorage.setItem('currentUser', JSON.stringify(fullUser));
+          console.log('AppContext: User synced and cached successfully');
           
-          // Load funds in background
-          loadUserFunds(fullUser.id).catch(error => {
-            console.error('Error loading user funds:', error);
-          });
+          // Load funds if not already loaded
+          if (!hasRestoredFromCache) {
+            loadUserFunds(fullUser.id).catch(error => {
+              console.error('Error loading user funds:', error);
+            });
+          }
         } catch (error) {
           console.error('Error syncing user:', error);
           // Fallback to basic Firebase user data
@@ -508,20 +544,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
           setIsAuthLoading(false);
         }
       } else {
+        console.log('AppContext: User signed out, clearing state');
         // User is signed out
         setCurrentUser(null);
         setFunds([]);
         setTransactions([]);
+        setUsers({}); // Clear users cache
+        setHasInitiallyLoaded(false); // Reset initial load state
         sessionStorage.removeItem('currentUser');
         setIsAuthLoading(false);
       }
     });
 
-    // Set auth loading to false after a maximum timeout
-    // This ensures UI doesn't get stuck in loading state
+    // Set auth loading to false after a maximum timeout to prevent infinite loading
     const loadingTimeout = setTimeout(() => {
-      setIsAuthLoading(false);
-    }, 2000);
+      if (!authInitialized) {
+        console.warn('AppContext: Auth initialization timeout, proceeding with current state');
+        setIsAuthLoading(false);
+        setAuthInitialized(true);
+      }
+    }, 3000); // Increased to 3 seconds for better reliability
 
     // Cleanup subscription on unmount
     return () => {
@@ -627,7 +669,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
         refreshCurrentUser,
         deleteFund,
         isAuthLoading,
+        authInitialized,
         isLoading,
+        hasInitiallyLoaded,
         loadUserFunds,
         loadFundTransactions,
         getFundById: fetchFundById
