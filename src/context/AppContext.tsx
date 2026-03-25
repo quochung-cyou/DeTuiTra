@@ -3,6 +3,8 @@ import { Fund, Transaction, User } from "@/types";
 import { toast } from "sonner";
 import { 
   loginWithGoogle, 
+  loginWithEmail as loginWithEmailService, 
+  registerWithEmail as registerWithEmailService,
   logoutUser, 
   onAuthStateChange 
 } from "@/firebase/auth";
@@ -33,6 +35,8 @@ interface AppContextType {
   transactions: Transaction[];
   selectedFund: Fund | null;
   login: () => Promise<void>;
+  loginWithEmail: (email: string, password: string) => Promise<void>;
+  registerWithEmail: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   setSelectedFund: (fund: Fund | null) => void;
   createFund: (fund: Omit<Fund, "id" | "createdAt" | "createdBy">) => Promise<Fund | undefined>;
@@ -90,6 +94,38 @@ export function AppProvider({ children }: { children: ReactNode }) {
       });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Đăng nhập thất bại";
+      toast.error(errorMessage);
+      throw error;
+    } finally {
+      setIsAuthLoading(false);
+    }
+  };
+
+  // Real Firebase login with email
+  const loginWithEmail = async (email: string, password: string) => {
+    try {
+      setIsAuthLoading(true);
+      await loginWithEmailService(email, password);
+      toast.success("Đăng nhập thành công!", {
+        duration: 1000,
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Đăng nhập thất bại";
+      toast.error(errorMessage);
+      throw error;
+    } finally {
+      setIsAuthLoading(false);
+    }
+  };
+
+  // Real Firebase registration with email
+  const registerWithEmail = async (email: string, password: string) => {
+    try {
+      setIsAuthLoading(true);
+      await registerWithEmailService(email, password);
+      toast.success("Đăng ký tài khoản thành công!");
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Đăng ký thất bại";
       toast.error(errorMessage);
       throw error;
     } finally {
@@ -654,6 +690,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         transactions,
         selectedFund,
         login,
+        loginWithEmail,
+        registerWithEmail,
         logout,
         setSelectedFund,
         createFund,

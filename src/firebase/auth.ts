@@ -5,6 +5,8 @@ import {
   User as FirebaseUser,
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
   setPersistence,
   browserLocalPersistence
 } from "firebase/auth";
@@ -24,6 +26,18 @@ export const loginWithGoogle = async (): Promise<UserCredential> => {
   // Use persistent session
   await setPersistence(auth, browserLocalPersistence);
   return signInWithPopup(auth, googleProvider);
+};
+
+// Sign in with Email and Password
+export const loginWithEmail = async (email: string, password: string): Promise<UserCredential> => {
+  await setPersistence(auth, browserLocalPersistence);
+  return signInWithEmailAndPassword(auth, email, password);
+};
+
+// Register with Email and Password
+export const registerWithEmail = async (email: string, password: string): Promise<UserCredential> => {
+  await setPersistence(auth, browserLocalPersistence);
+  return createUserWithEmailAndPassword(auth, email, password);
 };
 
 // Sign out
