@@ -123,17 +123,18 @@ export const formatNumber = (amount: number): string => {
  * Sanitize amount input to allow only digits and negative sign
  */
 export const sanitizeAmountInput = (value: string): string => {
-  // Allow negative sign at the beginning and digits
-  value = value.replace(/[^-\d]/g, '');
-  
-  // Only allow one negative sign at the beginning
+  value = value.replace(/[^-\d.]/g, '');
+
   if (value.startsWith('-')) {
-    const digits = value.substring(1).replace(/-/g, '');
-    value = '-' + digits;
+    const rest = value.substring(1).replace(/-/g, '');
+    const parts = rest.split('.');
+    value = '-' + parts[0] + (parts.length > 1 ? '.' + parts.slice(1).join('') : '');
   } else {
     value = value.replace(/-/g, '');
+    const parts = value.split('.');
+    value = parts[0] + (parts.length > 1 ? '.' + parts.slice(1).join('') : '');
   }
-  
+
   return value;
 };
 

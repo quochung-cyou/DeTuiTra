@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { FundDetailsSkeleton } from "@/components/skeletons/FundDetailsSkeleton";
 import { useRef } from "react";
-import { PlusIcon, ChevronDownIcon, ChevronUpIcon, CalendarIcon, SearchIcon, ArrowUpDownIcon, Users, EditIcon, MoreHorizontal, Receipt, CreditCard, Calculator } from "lucide-react";
+import { PlusIcon, ChevronDownIcon, ChevronUpIcon, CalendarIcon, SearchIcon, ArrowUpDownIcon, Users, EditIcon, MoreHorizontal, Receipt, CreditCard, Calculator, StickyNote } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { TransactionList } from "@/components/transactions/TransactionList";
 import { PersonalTransactionList } from "@/components/transactions/PersonalTransactionList";
@@ -32,6 +32,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { calculateTotalExpense } from "@/utils/transactionUtils";
 import { SpotlightCard } from "@/components/ui/spotlight-card";
 import { BankAccountButton } from "@/components/profile/BankAccountButton";
+import { FundNotesTab } from "@/components/notes/FundNotesTab";
 
 export default function FundDetails() {
   const { id } = useParams();
@@ -229,10 +230,14 @@ export default function FundDetails() {
       {/* Main Content */}
       <div className="space-y-6">
         <Tabs defaultValue="summary" value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="mb-4 w-full sm:w-auto">
-            <TabsTrigger value="summary" className="flex-1 sm:flex-auto">Tổng quan</TabsTrigger>
-            <TabsTrigger value="transactions" className="flex-1 sm:flex-auto">Giao dịch</TabsTrigger>
-            <TabsTrigger value="debts" className="flex-1 sm:flex-auto">Khoản nợ</TabsTrigger>
+          <TabsList className="mb-4 w-full flex flex-wrap h-auto gap-1">
+            <TabsTrigger value="summary" className="flex-1 sm:flex-auto min-w-[80px]">Tổng quan</TabsTrigger>
+            <TabsTrigger value="transactions" className="flex-1 sm:flex-auto min-w-[80px]">Giao dịch</TabsTrigger>
+            <TabsTrigger value="debts" className="flex-1 sm:flex-auto min-w-[80px]">Khoản nợ</TabsTrigger>
+            <TabsTrigger value="notes" className="flex-1 sm:flex-auto min-w-[80px]">
+              <StickyNote className="h-4 w-4 mr-1.5" />
+              Ghi chú
+            </TabsTrigger>
           </TabsList>
           
           {/* Summary Tab */}
@@ -504,6 +509,11 @@ export default function FundDetails() {
             </div>
             
             <PersonalTransactionList fund={selectedFund} searchQuery={searchQuery} dateRange={dateRange} />
+          </TabsContent>
+          
+          {/* Notes Tab */}
+          <TabsContent value="notes" className="animate-fade-in mt-6">
+            <FundNotesTab fund={selectedFund} />
           </TabsContent>
         </Tabs>
       </div>

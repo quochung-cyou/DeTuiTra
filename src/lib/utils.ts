@@ -12,7 +12,7 @@ export function cn(...inputs: ClassValue[]) {
  */
 export function formatNumberWithSeparators(amount: number | string): string {
   if (typeof amount === 'string') {
-    amount = parseInt(amount);
+    amount = parseFloat(amount as string);
     if (isNaN(amount)) return '0';
   }
   

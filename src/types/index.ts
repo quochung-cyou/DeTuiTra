@@ -99,3 +99,13 @@ export enum SplitType {
 export interface UserWithProfile extends User {
   isActive?: boolean;
 }
+
+export interface Note {
+  id: string;
+  fundId: string;
+  createdBy: string;
+  title: string;
+  content: string;
+  createdAt: number;
+  updatedAt?: number;
+}

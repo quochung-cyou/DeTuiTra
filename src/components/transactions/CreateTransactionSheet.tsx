@@ -223,33 +223,38 @@ export function CreateTransactionSheet({
     }
     
     if (!currentUser || !formData.amount) {
-      return; // This should be caught by validation
+      return;
     }
     
-    const totalAmount = parseInt(formData.amount);
+    const totalAmount = parseFloat(formData.amount);
     
-    // If splits are all zero, distribute evenly first
     const allZero = formData.splits.every(split => split.amount === 0);
     if (allZero) {
       distributeEvenly();
       toast.info("Đã tự động chia đều số tiền");
-      return; // Return to let the user review the distribution before submitting
+      return;
     }
     
-    // Use convertedAmount if available and not VND, otherwise use the input amount
-    const finalAmount = formData.currency?.code !== "VND" && formData.convertedAmount ? 
+    const isForeignCurrency = formData.currency?.code !== "VND" && formData.currency?.code;
+    const finalAmount = isForeignCurrency && formData.convertedAmount ? 
       formData.convertedAmount : 
       totalAmount;
+
+    let finalDescription = formData.description || "Giao dịch mới";
+    if (isForeignCurrency && formData.convertedAmount && totalAmount > 0) {
+      const rate = Math.round(formData.convertedAmount / totalAmount);
+      finalDescription = `(${totalAmount} ${formData.currency.code}) (Rate: ${formatNumberWithSeparators(rate)} VND/${formData.currency.code}) ${finalDescription}`;
+    }
       
     createTransaction({
       fundId: fund.id,
-      description: formData.description || "Giao dịch mới",
+      description: finalDescription,
       amount: finalAmount,
       paidBy: currentUser.id,
       splits: formData.splits,
       currencyCode: formData.currency?.code,
-      originalAmount: formData.currency?.code !== "VND" ? totalAmount : undefined,
-      exchangeRate: formData.currency?.code !== "VND" && formData.convertedAmount ? 
+      originalAmount: isForeignCurrency ? totalAmount : undefined,
+      exchangeRate: isForeignCurrency && formData.convertedAmount ? 
         formData.convertedAmount / totalAmount : 
         undefined
     });

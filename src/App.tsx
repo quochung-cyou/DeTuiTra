@@ -76,6 +76,7 @@ const App = () => (
                       <FundDetails />
                     </Suspense>
                   } />
+
                 </Route>
               </Route>
               

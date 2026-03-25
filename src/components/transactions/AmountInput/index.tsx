@@ -40,7 +40,7 @@ export function AmountInput({
     
     // If we have an amount, convert the amount
     if (amount && onCurrencyChange) {
-      const amountNum = parseInt(amount) || 0;
+      const amountNum = parseFloat(amount) || 0;
       
       // For VND, no conversion needed
       if (currency.code === "VND") {
@@ -72,7 +72,7 @@ export function AmountInput({
     // Skip if conversion rate is not available yet
     if (!conversionRate) return;
     
-    const amountNum = parseInt(amount) || 0;
+    const amountNum = parseFloat(amount) || 0;
     const convertedAmountToVND = Math.round(convertAmount(amountNum));
     
     console.log("useEffect - Conversion rate changed, updating converted amount:", {
@@ -103,7 +103,7 @@ export function AmountInput({
             placeholder="Nhập số tiền"
             value={amount}
             onChange={handleAmountChange}
-            inputMode="numeric"
+            inputMode="decimal"
             required
             className="h-10 text-right font-medium text-lg pr-8"
           />

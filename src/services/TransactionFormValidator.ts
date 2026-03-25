@@ -16,7 +16,7 @@ export interface ValidationError {
  */
 export class TransactionFormValidator {
   private members: User[];
-  
+
   /**
    * Create a new transaction form validator
    * @param members List of fund members to validate against
@@ -24,7 +24,7 @@ export class TransactionFormValidator {
   constructor(members: User[]) {
     this.members = members;
   }
-  
+
   /**
    * Validate the description field
    * @param description The transaction description
@@ -32,7 +32,7 @@ export class TransactionFormValidator {
    */
   public validateDescription(description: string): ValidationError[] {
     const errors: ValidationError[] = [];
-    
+
     if (!description || description.trim() === '') {
       errors.push({
         field: 'description',
@@ -46,10 +46,10 @@ export class TransactionFormValidator {
         severity: 'warning'
       });
     }
-    
+
     return errors;
   }
-  
+
   /**
    * Validate the amount field
    * @param amount The transaction amount as a string
@@ -57,7 +57,7 @@ export class TransactionFormValidator {
    */
   public validateAmount(amount: string): ValidationError[] {
     const errors: ValidationError[] = [];
-    
+
     if (!amount || amount.trim() === '') {
       errors.push({
         field: 'amount',
@@ -66,9 +66,9 @@ export class TransactionFormValidator {
       });
       return errors;
     }
-    
+
     const numericAmount = parseInt(amount);
-    
+
     if (isNaN(numericAmount)) {
       errors.push({
         field: 'amount',
@@ -81,23 +81,11 @@ export class TransactionFormValidator {
         message: 'Số tiền phải lớn hơn 0',
         severity: 'error'
       });
-    } else if (numericAmount < 1000) {
-      errors.push({
-        field: 'amount',
-        message: 'Số tiền quá nhỏ, có thể bạn đã nhập thiếu số 0?',
-        severity: 'warning'
-      });
-    } else if (numericAmount > 100000000) {
-      errors.push({
-        field: 'amount',
-        message: 'Số tiền quá lớn, vui lòng kiểm tra lại',
-        severity: 'warning'
-      });
     }
-    
+
     return errors;
   }
-  
+
   /**
    * Validate the splits array
    * @param splits The transaction splits
@@ -106,7 +94,7 @@ export class TransactionFormValidator {
    */
   public validateSplits(splits: { userId: string; amount: number }[], totalAmount: number): ValidationError[] {
     const errors: ValidationError[] = [];
-    
+
     if (!splits || splits.length === 0) {
       errors.push({
         field: 'splits',
@@ -115,7 +103,7 @@ export class TransactionFormValidator {
       });
       return errors;
     }
-    
+
     // Check if all splits are zero
     const allZero = splits.every(split => split.amount === 0);
     if (allZero) {
@@ -125,10 +113,10 @@ export class TransactionFormValidator {
         severity: 'error'
       });
     }
-    
+
     // Calculate the sum of all splits
     const totalSplits = splits.reduce((sum, split) => sum + split.amount, 0);
-    
+
     // Check if the sum of all splits is significantly different from zero
     if (Math.abs(totalSplits) > 10) {
       errors.push({
@@ -137,12 +125,12 @@ export class TransactionFormValidator {
         severity: 'error'
       });
     }
-    
+
 
 
     return errors;
   }
-  
+
   /**
    * Validate the entire transaction form
    * @param description The transaction description
@@ -154,7 +142,7 @@ export class TransactionFormValidator {
     // Combine all validation errors
     const descriptionErrors = this.validateDescription(description);
     const amountErrors = this.validateAmount(amount);
-    
+
     // Only validate splits if amount is valid
     let splitErrors: ValidationError[] = [];
     if (amountErrors.length === 0 && amount) {
@@ -163,7 +151,7 @@ export class TransactionFormValidator {
         splitErrors = this.validateSplits(splits, numericAmount);
       }
     }
-    
+
     return [...descriptionErrors, ...amountErrors, ...splitErrors];
   }
 }

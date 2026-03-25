@@ -109,7 +109,7 @@ export const useTransactionForm = ({
     const sanitizedValue = sanitizeAmountInput(e.target.value);
     
     // Validate the input
-    if (/^-?\d*$/.test(sanitizedValue)) {
+    if (/^-?\d*\.?\d*$/.test(sanitizedValue)) {
       setAmount(sanitizedValue);
       
       // Reset splits when amount changes
@@ -150,7 +150,7 @@ export const useTransactionForm = ({
     }
     
     // Use the converted amount if available and currency is not VND
-    let totalAmount = parseInt(amount);
+    let totalAmount = parseFloat(amount);
     if (currency.code !== "VND" && convertedAmount) {
       totalAmount = convertedAmount;
     }

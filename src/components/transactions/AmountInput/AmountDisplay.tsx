@@ -11,9 +11,9 @@ interface AmountDisplayProps {
 }
 
 export function AmountDisplay({ amount, currency, conversionRate, isLoading }: AmountDisplayProps) {
-  if (!amount || parseInt(amount) === 0) return null;
+  if (!amount || parseFloat(amount) === 0) return null;
   
-  const amountValue = parseInt(amount);
+  const amountValue = parseFloat(amount);
   const isNegative = amount.startsWith('-');
   const absAmount = Math.abs(amountValue);
   
