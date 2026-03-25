@@ -27,7 +27,7 @@ export default defineConfig(({ mode }) => ({
     // PWA Plugin
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'logo.png', 'apple-icon-180.png', 'manifest-icon-192.maskable.png', 'manifest-icon-512.maskable.png'],
+      includeAssets: ['favicon.ico', 'logo.png', 'apple-touch-icon-180x180.png', 'maskable-icon-512x512.png', 'pwa-192x192.png', 'pwa-512x512.png'],
       manifest: {
         name: 'Để Tui Trả',
         short_name: 'Để Tui Trả',
@@ -39,50 +39,21 @@ export default defineConfig(({ mode }) => ({
         scope: '/',
         orientation: 'portrait-primary',
         icons: [
-          // Standard icons for general use
           {
-            src: '/logo.png',
+            src: '/pwa-192x192.png',
             sizes: '192x192',
-            type: 'image/png',
-            purpose: 'any'
+            type: 'image/png'
           },
           {
-            src: '/logo.png',
+            src: '/pwa-512x512.png',
             sizes: '512x512',
-            type: 'image/png',
-            purpose: 'any'
-          },
-          // Proper maskable icons with safe zone padding
-          {
-            src: '/manifest-icon-192.maskable.png',
-            sizes: '192x192',
-            type: 'image/png',
-            purpose: 'maskable'
+            type: 'image/png'
           },
           {
-            src: '/manifest-icon-512.maskable.png',
+            src: '/maskable-icon-512x512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable'
-          },
-          // Additional sizes for better compatibility
-          {
-            src: '/logo.png',
-            sizes: '144x144',
-            type: 'image/png',
-            purpose: 'any'
-          },
-          {
-            src: '/logo.png',
-            sizes: '256x256',
-            type: 'image/png',
-            purpose: 'any'
-          },
-          {
-            src: '/logo.png',
-            sizes: '384x384',
-            type: 'image/png',
-            purpose: 'any'
           }
         ]
       },
@@ -147,7 +118,7 @@ export default defineConfig(({ mode }) => ({
     // Chunk optimization
     rollupOptions: {
       output: {
-        manualChunks: (id) => {          
+        manualChunks: (id) => {
           // Let Vite handle other chunks automatically
           return null;
         },

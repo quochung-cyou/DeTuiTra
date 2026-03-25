@@ -46,10 +46,10 @@ export function AppNavbar() {
       className="flex items-center justify-between px-4 py-2 border-b bg-background sticky top-0 z-20"
     >
       <div className="flex items-center gap-2 md:hidden">
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={toggleSidebar} 
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggleSidebar}
           className="lg:hidden"
         >
           <Menu className="h-5 w-5" />
@@ -57,15 +57,15 @@ export function AppNavbar() {
         </Button>
       </div>
 
-      <div className="flex items-center gap-3">
-        <img className="text-white p-2 rounded-md w-12 h-12 scale-[1.75]" src="/logo.png" alt="Để Tui Trả" />
+      <div className="flex items-center">
+        <img className="text-white p-2 rounded-md w-12 h-12 scale-[1]" src="/logo.png" alt="Để Tui Trả" />
         <h2 className="font-semibold text-lg hidden md:block">Để Tui Trả</h2>
       </div>
 
       <div className="flex gap-2 items-center">
 
-        
-        
+
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-8 w-8 rounded-full">
