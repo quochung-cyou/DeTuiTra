@@ -149,8 +149,10 @@ export default function FundDetails() {
     setSearchQuery("");
   };
   
-  // Sort members by amount (highest to lowest)
-  const sortedBalances = [...balances].sort((a, b) => b.amount - a.amount);
+  // Sort members by amount (highest to lowest), only current fund members
+  const sortedBalances = [...balances]
+    .filter((b) => selectedFund.members?.includes(b.userId))
+    .sort((a, b) => b.amount - a.amount);
   
   // Show only first 6 members if there are many and not showing all
   const displayedMembers = showAllMembers ? sortedBalances : sortedBalances.slice(0, 6);
