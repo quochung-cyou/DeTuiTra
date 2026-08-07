@@ -41,10 +41,7 @@ const App = () => (
         {/* PWA Components */}
         <PWAInitializer autoAskPermission={true} delayPermissionPrompt={5000} />
         <FCMInitializer pollingInterval={15000} />
-        {/* NotificationInitializer is no longer needed as FCMInitializer handles notifications */}
-        <div className="fixed bottom-4 left-4 z-50 max-w-md w-full">
-          <InstallPWAPrompt />
-        </div>
+        <InstallPWAPrompt />
         <BrowserRouter>
           {/* Using the DashboardSkeleton for a consistent loading experience */}
           <Suspense fallback={<DashboardSkeleton />}>

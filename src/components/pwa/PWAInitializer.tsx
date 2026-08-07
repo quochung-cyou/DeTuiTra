@@ -12,6 +12,7 @@ export function PWAInitializer({
   delayPermissionPrompt = 3000 // Default 3 seconds
 }: PWAInitializerProps) {
   const [showPermissionPrompt, setShowPermissionPrompt] = useState(false);
+  const [isFadingOut, setIsFadingOut] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
 
   // Initialize PWA and service worker
@@ -53,10 +54,41 @@ export function PWAInitializer({
     checkAndPromptForPermission();
   }, [isInitialized, autoAskPermission, delayPermissionPrompt]);
 
+  // Auto-dismiss after 15 seconds with fade-out animation
+  useEffect(() => {
+    if (!showPermissionPrompt) return;
+    
+    const fadeTimer = setTimeout(() => {
+      setIsFadingOut(true);
+    }, 12000); // Start fade-out at 12s
+    
+    const removeTimer = setTimeout(() => {
+      setShowPermissionPrompt(false);
+      setIsFadingOut(false);
+    }, 15000); // Fully removed at 15s
+    
+    return () => {
+      clearTimeout(fadeTimer);
+      clearTimeout(removeTimer);
+    };
+  }, [showPermissionPrompt]);
+
+  const handleClose = () => {
+    setIsFadingOut(true);
+    setTimeout(() => {
+      setShowPermissionPrompt(false);
+      setIsFadingOut(false);
+    }, 300); // Match animation duration
+  };
+
   return showPermissionPrompt ? (
-    <div className="fixed bottom-4 right-4 z-50 max-w-md w-full">
+    <div 
+      className={`fixed top-4 left-1/2 -translate-x-1/2 z-[90] w-full max-w-md px-4 transition-opacity duration-300 ${
+        isFadingOut ? 'opacity-0' : 'opacity-100'
+      }`}
+    >
       <NotificationPermission 
-        onClose={() => setShowPermissionPrompt(false)}
+        onClose={handleClose}
         showOnlyIfNotGranted={true}
       />
     </div>

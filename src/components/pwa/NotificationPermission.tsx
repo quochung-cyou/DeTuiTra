@@ -66,7 +66,7 @@ export function NotificationPermission({
   if (!showCard) return null;
 
   return (
-    <Card className="w-full max-w-md mx-auto shadow-lg border-primary/10 animate-in fade-in-50 duration-300">
+    <Card className="w-full max-w-md mx-auto shadow-lg border-primary/10 animate-in fade-in-50 slide-in-from-top-5 duration-300">
       <CardHeader className="space-y-1">
         <div className="flex items-center justify-between">
           <CardTitle className="text-xl font-semibold">

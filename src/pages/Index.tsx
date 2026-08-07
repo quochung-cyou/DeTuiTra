@@ -1,7 +1,6 @@
 
 import { useEffect } from "react";
 import Dashboard from "./Dashboard";
-import { Toaster } from "sonner";
 import { motion } from "framer-motion";
 
 const Index = () => {
@@ -17,13 +16,6 @@ const Index = () => {
       transition={{ duration: 0.5 }}
       className="min-h-screen bg-gradient-to-br from-blue-50 to-white"
     >
-      <Toaster 
-        position="top-right" 
-        toastOptions={{
-          duration: 3000,
-          className: "animate-slide-up"
-        }}
-      />
       <Dashboard />
     </motion.div>
   );

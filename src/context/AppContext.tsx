@@ -6,7 +6,8 @@ import {
   loginWithEmail as loginWithEmailService, 
   registerWithEmail as registerWithEmailService,
   logoutUser, 
-  onAuthStateChange 
+  onAuthStateChange,
+  handleRedirectResult
 } from "@/firebase/auth";
 import { User as FirebaseUser } from "firebase/auth";
 import {
@@ -87,11 +88,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const login = async () => {
     try {
       setIsAuthLoading(true);
-      await loginWithGoogle();
-      toast.success("Đăng nhập thành công!", {
-        duration: 1000,
-        
-      });
+      const result = await loginWithGoogle();
+      // Success toast only shows for popup flow (desktop)
+      // For redirect flow (mobile), the page navigates away and auth state is handled on return
+      if (result) {
+        toast.success("Đăng nhập thành công!", {
+          duration: 3000,
+        });
+      }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Đăng nhập thất bại";
       toast.error(errorMessage);
@@ -514,6 +518,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     console.log('AppContext: Initializing authentication...');
     let hasRestoredFromCache = false;
+    
+    // Handle redirect result from mobile Google sign-in
+    handleRedirectResult().then((result) => {
+      if (result) {
+        console.log('AppContext: Redirect sign-in completed');
+      }
+    }).catch((error) => {
+      console.error('AppContext: Error handling redirect result:', error);
+    });
     
     // Try to restore from sessionStorage to provide immediate UI feedback
     const cachedUser = sessionStorage.getItem('currentUser');
