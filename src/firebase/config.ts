@@ -18,19 +18,9 @@ const defaultConfig = {
 
 // Your web app's Firebase configuration with fallbacks to default values
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-
-// authDomain MUST be a *.firebaseapp.com or *.web.app domain — Firebase serves
-// the /__/auth/handler endpoint on these domains. Using a custom domain as
-// authDomain causes 404 on the auth handler route.
-const envAuthDomain = import.meta.env.VITE_FIREBASE_AUTH_DOMAIN;
-const isValidAuthDomain = (domain: string) =>
-  domain.endsWith('.firebaseapp.com') || domain.endsWith('.web.app');
-
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || defaultConfig.apiKey,
-  authDomain: (envAuthDomain && isValidAuthDomain(envAuthDomain))
-    ? envAuthDomain
-    : defaultConfig.authDomain,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || defaultConfig.authDomain,
   databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL || defaultConfig.databaseURL,
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || defaultConfig.projectId,
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || defaultConfig.storageBucket,
